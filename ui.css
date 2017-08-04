@@ -1,13 +1,21 @@
 .grid_button {
-    background-color: #243;
+    background-color: #000;
     border: 2px solid #000;
-	border-radius: 4px
+	border-radius: 4px;
     color: white;
-    padding: 25px;
+	padding: 0;
+	width: 100%;
+	height: 100%;
     text-align: center;
-    text-decoration: none;
+	font-family: "courier";
+	text-shadow: 0px 0px 3px #000000;
     display: inline-block;
-    font-size: 16px;
+    font-size: 12px;
 	-webkit-transition-duration: 0.2s; /* Safari */
     transition-duration: 0.2s;
+}
+
+th, td {
+	width:  50px;
+	height: 50px;
 }

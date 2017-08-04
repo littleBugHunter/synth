@@ -7,12 +7,12 @@ var colors = [];
 
 class ButtonColor
 {
-	constructor()
+	constructor(r = 0, g = 0, b = 0, intensity = 1)
 	{
-		this.r = 0;
-		this.g = 0;
-		this.b = 0;
-		this.intensity = 1;
+		this.r = r;
+		this.g = g;
+		this.b = b;
+		this.intensity = intensity;
 		this.flash = 0;
 	}
 	componentToHex(c)
@@ -95,14 +95,36 @@ for(var i = 0; i < 127; ++i)
 	a = Math.pow(2,1.0/12.0);
 	FREQUENCIES[i] = 440 * Math.pow(a, i - 81);
 }
-var chordProgression = [0, 4, 5, 3];
+
+var PATTERN_COLORS = [
+	[1.0,0.5,0.5],
+	[1.0,1.0,0.5],
+	[0.5,1.0,0.5],
+	[0.5,1.0,1.0],
+	[0.5,0.5,1.0],
+	[1.0,0.5,1.0],
+	[1.0,1.0,1.0],
+	[1.0,0.0,0.0],
+	[1.0,1.0,0.0],
+	[0.0,1.0,0.0],
+	[0.0,1.0,1.0],
+	[0.0,0.0,1.0],
+	[1.0,0.0,1.0],
+	[0.5,0.0,0.0],
+	[0.5,0.5,0.0],
+	[0.0,0.5,0.0],
+	[0.0,0.5,0.5],
+	[0.0,0.0,0.5],
+	[0.5,0.0,0.5],
+	[0.5,0.5,0.5],
+];
+var MAX_PATTERNS = 16;
+var chordProgression = [0, 4, 5, 3, -1, -1, -1, -1];
 var baseNote = 60; // MIDI C4
 var bpm = 120;
 var scale = MAJOR_SCALE;
 var currentTick = 0;
 var currentTab = 0;
-
-
 
 class Channel
 {
@@ -111,15 +133,15 @@ class Channel
 		this.mode = "Harmony";
 		this.patterns = [];
 		this.patternChain = [];
-		for(var i = 0; i < 16; ++i)
+		for(var i = 0; i < MAX_PATTERNS; ++i)
 		{
 			this.patterns[i] = [];
 			for(var j = 0; j < GRID_WIDTH; ++j)
 			{
-				this.patterns[j] = [];
+				this.patterns[i][j] = [];
 				for(var k = 0; k < GRID_HEIGHT; ++k)
 				{
-					this.patterns[k] = false;
+					this.patterns[i][j][k] = false;
 				}
 			}
 		}
