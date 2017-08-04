@@ -303,7 +303,7 @@ class PatternEditState extends BaseState
 			for(var y = 0; y < GRID_HEIGHT; ++y)
 			{
 				setGridColorAndIntensity(x, y, this.color[0], this.color[1], this.color[2], 0.2);
-				if(pattern[x][8-y])
+				if(pattern[x][7-y])
 				{
 					setGridIntensity(x,y,1);
 				}
@@ -318,12 +318,12 @@ class PatternEditState extends BaseState
 	{
 		if(!this.delPressed)
 		{
-			channels[this.channelId].patterns[this.patternId][x][8-y] = !channels[this.channelId].patterns[this.patternId][x][8-y];
-			setGridIntensity(x, y, channels[this.channelId].patterns[this.patternId][x][8-y] ? 1 : 0.2);
+			channels[this.channelId].patterns[this.patternId][x][7-y] = !channels[this.channelId].patterns[this.patternId][x][7-y];
+			setGridIntensity(x, y, channels[this.channelId].patterns[this.patternId][x][7-y] ? 1 : 0.2);
 		}
 		else
 		{
-			channels[this.channelId].patterns[this.patternId][x][8-y] = false;
+			channels[this.channelId].patterns[this.patternId][x][7-y] = false;
 			setGridIntensity(x, y, 0.2);
 		}
 	}

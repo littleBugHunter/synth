@@ -97,4 +97,5 @@ function stop()
 	clearInterval(tickInterval);
 	currentTick = -1;
 	currentTab = 0;
+	currentChord = 0;
 }
