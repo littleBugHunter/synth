@@ -5,21 +5,51 @@ var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function onTick()
 {
 	++currentTick;
-	if(currentTick >= WIDTH)
+	if(currentTick >= GRID_WIDTH)
 	{
 		currentTick = 0;
 		++currentTab;
-		if(currentTab >= 4)
+		++currentChord;
+		
+		if(currentTab >= GRID_WIDTH)
 		{
 			currentTab = 0;
+			currentChord = 0;
 		}
+		else
+		{
+			var isThereMoreSong = false;
+			for(var i = currentTab; i < GRID_WIDTH && !isThereMoreSong; ++i)
+			{
+				for(var j = 0; j < channels.length && !isThereMoreSong; ++j)
+				{
+					if(channels[j].patternChain[i] != -1)
+					{
+						isThereMoreSong = true;
+					}
+				}
+			}
+			if(!isThereMoreSong)
+			{
+				currentTab = 0;
+				currentChord = 0;
+			}
+		}
+		if(chordProgression[currentChord] == -1)
+		{
+			currentChord = 0;
+		}
+		
+		tabEvent = document.createEvent("Event");
+		tabEvent.initEvent("tab", false, false);
+		document.dispatchEvent(tabEvent);
 	}
 	
     var now = audioCtx.currentTime;
 	for(var i = 0; i < channels.length; ++i)
 	{
-		var frequencies = channels[i].getFrequencies();
-		for(var j = 0; j < HEIGHT; ++j)
+		var frequencies = channels[i].getFrequencies(currentTab, currentTick);
+		for(var j = 0; j < frequencies.length; ++j)
 		{
 			var gain = audioCtx.createGain();
 			gain.connect(audioCtx.destination);
@@ -46,7 +76,25 @@ function onTick()
 			oscillator3.connect(gain);
 		}
 	}
+	tickEvent = document.createEvent("Event");
+	tickEvent.initEvent("tick", false, false);
+	document.dispatchEvent(tickEvent);
 }
 
-init();
-var ticks = setInterval(onTick, (60/(BPM*2))*1000);
+function play()
+{
+	stop();
+	tickInterval = setInterval(onTick, (60/(bpm*2))*1000);
+}
+
+function pause()
+{
+	clearInterval(tickInterval);
+}
+
+function stop()
+{
+	clearInterval(tickInterval);
+	currentTick = -1;
+	currentTab = 0;
+}

@@ -30,6 +30,18 @@ class BaseState
 		{
 			switchToState(new PatternChainState());
 		}
+		if(id == "play")
+		{
+			play();
+		}
+		if(id == "pause")
+		{
+			pause();
+		}
+		if(id == "stop")
+		{
+			stop();
+		}
 		if(id == "del" || id == "fn")
 		{
 			if(id == "del")
@@ -60,6 +72,10 @@ class BaseState
 			}
 		}
 	}
+	onTick()
+	{}
+	onTab()
+	{}
 }
 
 class ScaleSelectState extends BaseState
@@ -176,6 +192,13 @@ class ChordProgressionState extends BaseState
 			setGridIntensity(x, 7-chordProgression[x], 1);
 		}
 	}
+	onTab()
+	{
+		for(var i = 0; i < GRID_HEIGHT; ++i)
+		{
+			flashGridButton(currentChord,i,0.3,(60/(bpm/4))*1000);
+		}
+	}
 }
 
 
@@ -252,6 +275,13 @@ class PatternChainState extends BaseState
 			idButtons["-"].style.backgroundColor = color;
 		}
 	}
+	onTab()
+	{
+		for(var i = 0; i < GRID_HEIGHT; ++i)
+		{
+			flashGridButton(currentTab,i,0.3,(60/(bpm/4))*1000);
+		}
+	}
 }
 
 class PatternEditState extends BaseState
@@ -273,7 +303,7 @@ class PatternEditState extends BaseState
 			for(var y = 0; y < GRID_HEIGHT; ++y)
 			{
 				setGridColorAndIntensity(x, y, this.color[0], this.color[1], this.color[2], 0.2);
-				if(pattern[x][y])
+				if(pattern[x][8-y])
 				{
 					setGridIntensity(x,y,1);
 				}
@@ -288,15 +318,16 @@ class PatternEditState extends BaseState
 	{
 		if(!this.delPressed)
 		{
-			channels[this.channelId].patterns[this.patternId][x][y] = !channels[this.channelId].patterns[this.patternId][x][y];
-			setGridIntensity(x, y, channels[this.channelId].patterns[this.patternId][x][y] ? 1 : 0.2);
+			channels[this.channelId].patterns[this.patternId][x][8-y] = !channels[this.channelId].patterns[this.patternId][x][8-y];
+			setGridIntensity(x, y, channels[this.channelId].patterns[this.patternId][x][8-y] ? 1 : 0.2);
 		}
 		else
 		{
-			channels[this.channelId].patterns[this.patternId][x][y] = false;
+			channels[this.channelId].patterns[this.patternId][x][8-y] = false;
 			setGridIntensity(x, y, 0.2);
 		}
 	}
+	
 	onIdButtonPressed(id)
 	{
 		this.__proto__.__proto__.onIdButtonPressed(id);
@@ -319,6 +350,18 @@ class PatternEditState extends BaseState
 			switchToState(new PatternEditState(this.channelId, newPattern));
 		}
 	}
+	
+	
+	onTick()
+	{
+		if(channels[this.channelId].patternChain[currentTab] == this.patternId)
+		{
+			for(var i = 0; i < GRID_HEIGHT; ++i)
+			{
+				flashGridButton(currentTick,i,0.3,(60/(bpm*2))*1000);
+			}
+		}
+	}
 }
 
 
@@ -332,6 +375,8 @@ function switchToState(state)
 
 document.addEventListener("gridButtonPressed", function(e){ currentState.onGridButtonPressed(e.x, e.y); });
 document.addEventListener("idButtonPressed",   function(e){ currentState.onIdButtonPressed(e.id); });
-switchToState(new ScaleSelectState());
+document.addEventListener("tick",   		   function(e){ currentState.onTick(); });
+document.addEventListener("tab",   	    	   function(e){ currentState.onTab(); });
+switchToState(new PatternEditState(0,0));
 
 

@@ -14,6 +14,7 @@ class ButtonColor
 		this.b = b;
 		this.intensity = intensity;
 		this.flash = 0;
+		this.timeout = null;
 	}
 	componentToHex(c)
 	{
@@ -76,11 +77,30 @@ function setGridColorAndIntensity(x,y,r,g,b,intensity)
 	document.dispatchEvent(colorChangedEvent);
 }
 
-function flashGridButton(x, y)
+function flashGridButton(x, y, intensity, duration)
 {
-	colors[x][y].flash = 1;
-	colorChangedEvent.initEvent("colorChanged", x, y, colors[x][y]);
-	document.dispatchEvent(colorChanged);
+	colors[x][y].flash = intensity;
+	var colorChangedEvent = document.createEvent("Event");
+	colorChangedEvent.initEvent("gridColorChanged", x, y, colors[x][y]);
+	colorChangedEvent.x = x;
+	colorChangedEvent.y = y;
+	colorChangedEvent.color = colors[x][y];
+	document.dispatchEvent(colorChangedEvent);
+	if(colors[x][y].timeout != null)
+	{
+		clearTimeout(colors[x][y].timeout);
+	}
+	colors[x][y].timeout = setTimeout(function(){
+			colors[x][y].timeout = null;
+			colors[x][y].flash = 0;
+			var colorChangedEvent = document.createEvent("Event");
+			colorChangedEvent.initEvent("gridColorChanged", x, y, colors[x][y]);
+			colorChangedEvent.x = x;
+			colorChangedEvent.y = y;
+			colorChangedEvent.color = colors[x][y];
+			document.dispatchEvent(colorChangedEvent);
+		}
+		, duration);
 }
 
 ////////////////////// MUSIC DATA ////////////////////
@@ -123,8 +143,11 @@ var chordProgression = [0, 4, 5, 3, -1, -1, -1, -1];
 var baseNote = 60; // MIDI C4
 var bpm = 120;
 var scale = MAJOR_SCALE;
-var currentTick = 0;
+var currentTick = -1;
 var currentTab = 0;
+var currentChord = 0;
+
+var tickInterval = null;
 
 class Channel
 {
@@ -151,28 +174,18 @@ class Channel
 		}
 	}
 	
-	getPattern(tab)
-	{
-		if(tab < 0 || tab >= WIDTH)
-			return null;
-		if(patternChain[tab] == -1)
-			return null;
-		return patterns[patternChain]
-	}
-	
-	
 	getFrequencies(tab, tick)
 	{
-		if(tab  < 0 || tab >= WIDTH)
+		if(tab  < 0 || tab >= GRID_WIDTH)
 			return [];
-		if(tick < 0 || tick >= WIDTH)
+		if(tick < 0 || tick >= GRID_WIDTH)
 			return [];
 		if(this.patternChain[tab] == -1)
 			return [];
 		
-		var patternSlice = patterns[patternChain][tick];
+		var patternSlice = this.patterns[this.patternChain[tab]][tick];
 		var generateFrequency;
-		var chord = chordProgression[tab%chordProgression.length];
+		var chord = chordProgression[currentChord];
 		if(this.mode == "Harmony")
 		{
 			generateFrequency = function(id)
@@ -217,4 +230,8 @@ for(var i = 0; i < GRID_HEIGHT; ++i)
 {
 	channels[i] = new Channel();
 }
+channels[0].patternChain[0] = 0;
+channels[0].patternChain[1] = 0;
+channels[0].patternChain[2] = 0;
+channels[0].patternChain[3] = 0;
 
